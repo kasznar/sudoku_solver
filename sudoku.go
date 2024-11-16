@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+type Position struct {
+	rowIndex int
+	colIndex int
+}
 
 type Sudoku [9][9]int
 
@@ -28,25 +31,24 @@ func (s *Sudoku) print() {
 }
 
 // todo: what if we already have value there?
-func (s *Sudoku) isSafeToPlace(rowIndex int, colIndex int, value int) bool {
+func (s *Sudoku) isSafeToPlace(value int, position Position) bool {
 	for i := 0; i < 9; i++ {
-		if s[rowIndex][i] == value {
+		if s[position.rowIndex][i] == value {
 			return false
 		}
 	}
 
 	for i := 0; i < 9; i++ {
-		if s[i][colIndex] == value {
+		if s[i][position.colIndex] == value {
 			return false
 		}
 	}
 
-	blockStartRowIndex := rowIndex - rowIndex%3
-	blockStartColIndex := colIndex - colIndex%3
+	blockStart := Position{rowIndex: position.rowIndex - position.rowIndex%3, colIndex: position.colIndex - position.colIndex%3}
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if s[i+blockStartRowIndex][j+blockStartColIndex] == value {
+			if s[i+blockStart.rowIndex][j+blockStart.colIndex] == value {
 				return false
 			}
 		}
@@ -78,7 +80,7 @@ func (s *Sudoku) solve(rowIndex int, colIndex int) bool {
 
 	// try possible values
 	for number := 0; number < 10; number++ {
-		if s.isSafeToPlace(rowIndex, colIndex, number) {
+		if s.isSafeToPlace(number, Position{rowIndex, colIndex}) {
 			s[rowIndex][colIndex] = number
 
 			//  incremented here as well
@@ -118,23 +120,8 @@ var solution = Sudoku{
 	{7, 4, 5, 2, 8, 6, 3, 1, 9},
 }
 
-func testSafetyCheck(rowIndex int, colIndex int, value int) {
-	print("It is ")
-
-	if sudoku.isSafeToPlace(rowIndex, colIndex, value) {
-		print("Safe")
-	} else {
-		print("Unsafe")
-	}
-
-	fmt.Printf(" to place %v at [%v][%v] \n", value, rowIndex, colIndex)
-}
-
 func main() {
 	sudoku.print()
-	testSafetyCheck(0, 1, 1)
-	testSafetyCheck(0, 1, 3)
-	testSafetyCheck(0, 1, 8)
 
 	sudoku.solve(0, 0)
 	sudoku.print()

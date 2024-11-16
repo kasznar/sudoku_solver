@@ -2,9 +2,9 @@ package main
 
 import "fmt"
 
-type Sudoku [][]int
+type Sudoku [9][9]int
 
-func (s Sudoku) print() {
+func (s *Sudoku) print() {
 	for rangeIndex, row := range s {
 		print("|")
 		for numberIndex, number := range row {
@@ -28,7 +28,7 @@ func (s Sudoku) print() {
 }
 
 // todo: what if we already have value there?
-func (s Sudoku) isSafeToPlace(rowIndex int, colIndex int, value int) bool {
+func (s *Sudoku) isSafeToPlace(rowIndex int, colIndex int, value int) bool {
 	for i := 0; i < 9; i++ {
 		if s[rowIndex][i] == value {
 			return false
@@ -54,6 +54,44 @@ func (s Sudoku) isSafeToPlace(rowIndex int, colIndex int, value int) bool {
 	}
 
 	return true
+}
+
+// todo: aint gona work with a method
+func (s *Sudoku) solve(rowIndex int, colIndex int) bool {
+	// todo: why 8???, because it's 0 indexed
+	// then why 9? already increased too much somewhere?
+	// todo: check where is colIndex increased
+	if rowIndex == 8 && colIndex == 9 {
+		return true
+	}
+
+	// yeah, we let it increase too much
+	if colIndex == 9 {
+		rowIndex++
+		colIndex = 0
+	}
+
+	// step to next if already has value
+	if s[rowIndex][colIndex] != 0 {
+		return s.solve(rowIndex, colIndex+1)
+	}
+
+	// try possible values
+	for number := 0; number < 10; number++ {
+		if s.isSafeToPlace(rowIndex, colIndex, number) {
+			s[rowIndex][colIndex] = number
+
+			//  incremented here as well
+			if s.solve(rowIndex, colIndex+1) {
+				return true
+			}
+		}
+
+		// we set the value back to 0, prob this is why it can work with mutable array
+		s[rowIndex][colIndex] = 0
+	}
+
+	return false
 }
 
 var sudoku = Sudoku{
@@ -97,4 +135,7 @@ func main() {
 	testSafetyCheck(0, 1, 1)
 	testSafetyCheck(0, 1, 3)
 	testSafetyCheck(0, 1, 8)
+
+	sudoku.solve(0, 0)
+	sudoku.print()
 }

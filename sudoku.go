@@ -5,18 +5,19 @@ type Position struct {
 	colIndex int
 }
 
-func (p *Position) next() Position {
-	p.colIndex++
+func (p Position) next() Position {
+	next := Position{rowIndex: p.rowIndex, colIndex: p.colIndex}
+	next.colIndex++
 
-	if p.colIndex == 9 {
-		p.rowIndex++
-		p.colIndex = 0
+	if next.colIndex == 9 {
+		next.rowIndex++
+		next.colIndex = 0
 	}
 
-	return *p
+	return next
 }
 
-func (p *Position) isOutOfBound() bool {
+func (p Position) isOutOfBound() bool {
 	return p.rowIndex > 8
 }
 
@@ -95,7 +96,6 @@ func (s *Sudoku) isSafeToPlace(value int, position Position) bool {
 	return true
 }
 
-// todo: aint gona work with a method
 func (s *Sudoku) solve(position Position) bool {
 
 	if position.isOutOfBound() {
@@ -117,7 +117,6 @@ func (s *Sudoku) solve(position Position) bool {
 			}
 		}
 
-		// we set the value back to 0, prob this is why it can work with mutable array
 		s.set(0, position)
 	}
 

@@ -17,8 +17,6 @@ func TestInsertSafetyCheck(t *testing.T) {
 		{rowI: 0, colI: 1, value: 8, expected: false},
 	}
 
-	println(input)
-
 	for _, data := range input {
 		result := sudoku.isSafeToPlace(data.value, Position{colIndex: data.colI, rowIndex: data.rowI})
 		if result != data.expected {
@@ -28,8 +26,33 @@ func TestInsertSafetyCheck(t *testing.T) {
 }
 
 func TestSolution(t *testing.T) {
-	sudoku.solve(0, 0)
+	sudoku.solve(Position{0, 0})
+
+	println("Result")
+	sudoku.print()
+
+	println("Solution")
+	solution.print()
+
 	if !reflect.DeepEqual(solution, sudoku) {
+		t.Fatal("Wrong solution")
+	}
+}
+
+func TestCopy(t *testing.T) {
+	copied := solution.copy()
+
+	if !reflect.DeepEqual(copied, solution) {
+		t.Fatal("Copy doesn't match")
+	}
+}
+
+func TestStepThrough(t *testing.T) {
+	testValue := solution.copy()
+
+	testValue.solve(Position{0, 0})
+
+	if !reflect.DeepEqual(solution, testValue) {
 		t.Fatal("Wrong solution")
 	}
 }

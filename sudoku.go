@@ -5,7 +5,44 @@ type Position struct {
 	colIndex int
 }
 
+func (p *Position) next() Position {
+	p.colIndex++
+
+	if p.colIndex == 9 {
+		p.rowIndex++
+		p.colIndex = 0
+	}
+
+	return *p
+}
+
+func (p *Position) isOutOfBound() bool {
+	return p.rowIndex > 8
+}
+
 type Sudoku [9][9]int
+
+func (s *Sudoku) get(position Position) int {
+	return s[position.rowIndex][position.colIndex]
+}
+
+func (s *Sudoku) set(value int, position Position) {
+	s[position.rowIndex][position.colIndex] = value
+}
+
+func (s *Sudoku) hasValueAt(position Position) bool {
+	return s.get(position) != 0
+}
+
+func (s *Sudoku) copy() Sudoku {
+	var copied Sudoku
+	for i := 0; i < 9; i++ {
+		for j := 0; j < 9; j++ {
+			copied[i][j] = s[i][j]
+		}
+	}
+	return copied
+}
 
 func (s *Sudoku) print() {
 	for rangeIndex, row := range s {
@@ -59,38 +96,29 @@ func (s *Sudoku) isSafeToPlace(value int, position Position) bool {
 }
 
 // todo: aint gona work with a method
-func (s *Sudoku) solve(rowIndex int, colIndex int) bool {
-	// todo: why 8???, because it's 0 indexed
-	// then why 9? already increased too much somewhere?
-	// todo: check where is colIndex increased
-	if rowIndex == 8 && colIndex == 9 {
+func (s *Sudoku) solve(position Position) bool {
+
+	if position.isOutOfBound() {
 		return true
 	}
 
-	// yeah, we let it increase too much
-	if colIndex == 9 {
-		rowIndex++
-		colIndex = 0
-	}
-
-	// step to next if already has value
-	if s[rowIndex][colIndex] != 0 {
-		return s.solve(rowIndex, colIndex+1)
+	if s.hasValueAt(position) {
+		return s.solve(position.next())
 	}
 
 	// try possible values
 	for number := 0; number < 10; number++ {
-		if s.isSafeToPlace(number, Position{rowIndex, colIndex}) {
-			s[rowIndex][colIndex] = number
+		if s.isSafeToPlace(number, position) {
+			s.set(number, position)
 
 			//  incremented here as well
-			if s.solve(rowIndex, colIndex+1) {
+			if s.solve(position.next()) {
 				return true
 			}
 		}
 
 		// we set the value back to 0, prob this is why it can work with mutable array
-		s[rowIndex][colIndex] = 0
+		s.set(0, position)
 	}
 
 	return false
@@ -123,6 +151,6 @@ var solution = Sudoku{
 func main() {
 	sudoku.print()
 
-	sudoku.solve(0, 0)
+	sudoku.solve(Position{0, 0})
 	sudoku.print()
 }

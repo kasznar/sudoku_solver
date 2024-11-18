@@ -68,7 +68,6 @@ func (s *Sudoku) print() {
 	}
 }
 
-// todo: what if we already have value there?
 func (s *Sudoku) isSafeToPlace(value int, position Position) bool {
 	for i := 0; i < 9; i++ {
 		if s[position.rowIndex][i] == value {
@@ -111,7 +110,6 @@ func (s *Sudoku) solve(position Position) bool {
 		if s.isSafeToPlace(number, position) {
 			s.set(number, position)
 
-			//  incremented here as well
 			if s.solve(position.next()) {
 				return true
 			}
